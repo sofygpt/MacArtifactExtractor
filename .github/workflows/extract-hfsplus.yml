@@ -1,0 +1,81 @@
+name: Extract HfsPlus from Apple Tahoe
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Exact Tahoe version, e.g. 26.2; empty selects newest stable 26.x'
+        required: false
+        default: ''
+        type: string
+      build:
+        description: 'Optional exact stable build (25-series); leave empty for first run'
+        required: false
+        default: ''
+        type: string
+      firmware_name:
+        description: 'Optional exact .fd/.scap filename; empty scans all available Intel firmware'
+        required: false
+        default: ''
+        type: string
+      ocbinary_commit:
+        description: 'Optional full 40-character OcBinaryData commit SHA for comparison'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: macos-15-intel
+    timeout-minutes: 180
+    steps:
+      - name: Checkout scripts
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Test validators
+        run: python3 -m unittest discover -s tests -v
+      - name: Free space on this ephemeral runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${RUNNER_ENVIRONMENT:-}" != "github-hosted" ]]; then
+            echo 'Refusing Xcode cleanup outside a GitHub-hosted runner.' >&2
+            exit 1
+          fi
+          # The job does not compile code. Only preinstalled Xcode bundles are removed.
+          # No disk formatting, workspace deletion, SDK installation or host firmware access.
+          for app in /Applications/Xcode*.app; do
+            if [[ -d "$app" && ! -L "$app" ]]; then
+              echo "Removing preinstalled runner application: $app"
+              sudo rm -rf -- "$app"
+            fi
+          done
+          df -h "${RUNNER_TEMP}"
+      - name: Download Apple Tahoe and extract HfsPlus
+        shell: bash
+        env:
+          TAHOE_VERSION: ${{ inputs.version }}
+          TAHOE_BUILD: ${{ inputs.build }}
+          FIRMWARE_NAME: ${{ inputs.firmware_name }}
+          OCBINARY_COMMIT: ${{ inputs.ocbinary_commit }}
+        run: |
+          set -euo pipefail
+          python3 scripts/extract_tahoe.py \
+            --version "$TAHOE_VERSION" \
+            --build "$TAHOE_BUILD" \
+            --firmware-name "$FIRMWARE_NAME" \
+            --ocbinary-commit "$OCBINARY_COMMIT" \
+            --output output
+      - name: Upload extracted drivers and diagnostic records
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: tahoe-hfsplus-${{ github.run_id }}-${{ github.run_attempt }}
+          path: output/
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 6

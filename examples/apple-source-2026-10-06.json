@@ -1,0 +1,14 @@
+{
+  "product_id": "142-28081",
+  "version": "26.7.1",
+  "build": "25G241",
+  "package_url": "https://swcdn.apple.com/content/downloads/51/17/142-28081-A_616Q67X32N/5atqz1miz61kmrim7fwkn7yi62xuzzcc0s/InstallAssistant.pkg",
+  "package_size_bytes": 18380974544,
+  "distribution_url": "https://swdist.apple.com/content/downloads/51/17/142-28081-A_616Q67X32N/5atqz1miz61kmrim7fwkn7yi62xuzzcc0s/142-28081.English.dist",
+  "distribution_sha256": "351d0100556f96ceaeaa3a20bbac4e3d4482ab9a079aa4330bf4e2c447c76547",
+  "post_date": "2026-09-28 17:27:06",
+  "catalog_url": "https://swscan.apple.com/content/catalogs/others/index-26-15-14-13-12-10.16-10.15-10.14-10.13-10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog",
+  "catalog_sha256": "f96d2af3486e29624cb76116ab7686c8af36fa91c86536be9b44c9acd5fb5f6a",
+  "resolved_at_utc": "2026-10-06T02:13:59.898869+00:00",
+  "catalog_metadata_errors": []
+}
